@@ -227,6 +227,9 @@ function renderChart(data: number[], labels: string[]) {
   // const ctx = ($('#lineChart') as HTMLCanvasElement).getContext('2d');
   const lineChart = $('#lineChart') as HTMLCanvasElement;
   const ctx = lineChart.getContext('2d');
+  if (!ctx) {
+    return;
+  }
   Chart.defaults.color = '#f5eaea';
   Chart.defaults.font.family = 'Exo 2';
   new Chart(ctx, {
