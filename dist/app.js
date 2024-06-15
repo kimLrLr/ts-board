@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,6 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+var axios_1 = require("axios");
+var chart_js_1 = require("chart.js");
 // utils
 function $(selector) {
     return document.querySelector(selector);
@@ -42,6 +46,7 @@ function getUnixTimestamp(date) {
     return new Date(date).getTime();
 }
 // DOM
+// var a: Element | HTMLElement | HTMLParagraphElement;
 var confirmedTotal = $('.confirmed-total');
 var deathsTotal = $('.deaths');
 var recoveredTotal = $('.recovered');
@@ -68,12 +73,18 @@ var isRecoveredLoading = false;
 // api
 function fetchCovidSummary() {
     var url = 'https://api.covid19api.com/summary';
-    return axios.get(url);
+    return axios_1.default.get(url);
 }
-function fetchCountryInfo(countryCode, status) {
-    // params: confirmed, recovered, deaths
-    var url = "https://api.covid19api.com/country/".concat(countryCode, "/status/").concat(status);
-    return axios.get(url);
+var CovidStatus;
+(function (CovidStatus) {
+    CovidStatus["Confirmed"] = "confirmed";
+    CovidStatus["Recovered"] = "recovered";
+    CovidStatus["Deaths"] = "deaths";
+})(CovidStatus || (CovidStatus = {}));
+function fetchCountryInfo(countryName, status) {
+    // status params: confirmed, recovered, deaths
+    var url = "https://api.covid19api.com/country/".concat(countryName, "/status/").concat(status);
+    return axios_1.default.get(url);
 }
 // methods
 function startApp() {
@@ -104,13 +115,13 @@ function handleListClick(event) {
                     clearRecoveredList();
                     startLoadingAnimation();
                     isDeathLoading = true;
-                    return [4 /*yield*/, fetchCountryInfo(selectedId, 'deaths')];
+                    return [4 /*yield*/, fetchCountryInfo(selectedId, CovidStatus.Deaths)];
                 case 1:
                     deathResponse = (_a.sent()).data;
-                    return [4 /*yield*/, fetchCountryInfo(selectedId, 'recovered')];
+                    return [4 /*yield*/, fetchCountryInfo(selectedId, CovidStatus.Recovered)];
                 case 2:
                     recoveredResponse = (_a.sent()).data;
-                    return [4 /*yield*/, fetchCountryInfo(selectedId, 'confirmed')];
+                    return [4 /*yield*/, fetchCountryInfo(selectedId, CovidStatus.Confirmed)];
                 case 3:
                     confirmedResponse = (_a.sent()).data;
                     endLoadingAnimation();
@@ -131,7 +142,7 @@ function setDeathsList(data) {
         var li = document.createElement('li');
         li.setAttribute('class', 'list-item-b flex align-center');
         var span = document.createElement('span');
-        span.textContent = value.Cases;
+        span.textContent = value.Cases.toString();
         span.setAttribute('class', 'deaths');
         var p = document.createElement('p');
         p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
@@ -144,7 +155,7 @@ function clearDeathList() {
     deathsList.innerHTML = null;
 }
 function setTotalDeathsByCountry(data) {
-    deathsTotal.innerText = data[0].Cases;
+    deathsTotal.innerText = data[0].Cases.toString();
 }
 function setRecoveredList(data) {
     var sorted = data.sort(function (a, b) { return getUnixTimestamp(b.Date) - getUnixTimestamp(a.Date); });
@@ -152,7 +163,7 @@ function setRecoveredList(data) {
         var li = document.createElement('li');
         li.setAttribute('class', 'list-item-b flex align-center');
         var span = document.createElement('span');
-        span.textContent = value.Cases;
+        span.textContent = value.Cases.toString();
         span.setAttribute('class', 'recovered');
         var p = document.createElement('p');
         p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
@@ -165,7 +176,7 @@ function clearRecoveredList() {
     recoveredList.innerHTML = null;
 }
 function setTotalRecoveredByCountry(data) {
-    recoveredTotal.innerText = data[0].Cases;
+    recoveredTotal.innerText = data[0].Cases.toString();
 }
 function startLoadingAnimation() {
     deathsList.appendChild(deathSpinner);
@@ -194,10 +205,12 @@ function setupData() {
     });
 }
 function renderChart(data, labels) {
-    var ctx = $('#lineChart').getContext('2d');
-    Chart.defaults.color = '#f5eaea';
-    Chart.defaults.font.family = 'Exo 2';
-    new Chart(ctx, {
+    // const ctx = ($('#lineChart') as HTMLCanvasElement).getContext('2d');
+    var lineChart = $('#lineChart');
+    var ctx = lineChart.getContext('2d');
+    chart_js_1.Chart.defaults.color = '#f5eaea';
+    chart_js_1.Chart.defaults.font.family = 'Exo 2';
+    new chart_js_1.Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
@@ -217,17 +230,19 @@ function setChartData(data) {
     var chartData = data.slice(-14).map(function (value) { return value.Cases; });
     var chartLabel = data
         .slice(-14)
-        .map(function (value) { return new Date(value.Date).toLocaleDateString().slice(5, -1); });
+        .map(function (value) {
+        return new Date(value.Date).toLocaleDateString().slice(5, -1);
+    });
     renderChart(chartData, chartLabel);
 }
 function setTotalConfirmedNumber(data) {
-    confirmedTotal.innerText = data.Countries.reduce(function (total, current) { return (total += current.TotalConfirmed); }, 0);
+    confirmedTotal.innerText = data.Countries.reduce(function (total, current) { return (total += current.TotalConfirmed); }, 0).toString();
 }
 function setTotalDeathsByWorld(data) {
-    deathsTotal.innerText = data.Countries.reduce(function (total, current) { return (total += current.TotalDeaths); }, 0);
+    deathsTotal.innerText = data.Countries.reduce(function (total, current) { return (total += current.TotalDeaths); }, 0).toString();
 }
 function setTotalRecoveredByWorld(data) {
-    recoveredTotal.innerText = data.Countries.reduce(function (total, current) { return (total += current.TotalRecovered); }, 0);
+    recoveredTotal.innerText = data.Countries.reduce(function (total, current) { return (total += current.TotalRecovered); }, 0).toString();
 }
 function setCountryRanksByConfirmedCases(data) {
     var sorted = data.Countries.sort(function (a, b) { return b.TotalConfirmed - a.TotalConfirmed; });
@@ -236,7 +251,7 @@ function setCountryRanksByConfirmedCases(data) {
         li.setAttribute('class', 'list-item flex align-center');
         li.setAttribute('id', value.Slug);
         var span = document.createElement('span');
-        span.textContent = value.TotalConfirmed;
+        span.textContent = value.TotalConfirmed.toString();
         span.setAttribute('class', 'cases');
         var p = document.createElement('p');
         p.setAttribute('class', 'country');
