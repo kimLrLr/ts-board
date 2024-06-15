@@ -4,8 +4,12 @@ import { Chart } from 'chart.js';
 import { CountrySummaryResponse, CovidSummaryResponse, Country, CountrySummaryInfo } from './covid/index';
 
 // utils
-function $(selector: string) {
-  return document.querySelector(selector);
+// function $(selector: string) {
+//   return document.querySelector(selector);
+// }
+function $<T extends HTMLElement = HTMLDivElement>(selector: string) {
+  const element = document.querySelector(selector);
+  return element as T;
 }
 function getUnixTimestamp(date: Date | string | number) {
   return new Date(date).getTime();
@@ -14,13 +18,25 @@ function getUnixTimestamp(date: Date | string | number) {
 
 // DOM
 // var a: Element | HTMLElement | HTMLParagraphElement;
-const confirmedTotal = $('.confirmed-total') as HTMLSpanElement;
-const deathsTotal = $('.deaths') as HTMLParagraphElement;
-const recoveredTotal = $('.recovered') as HTMLParagraphElement;
-const lastUpdatedTime = $('.last-updated-time') as HTMLSpanElement;
-const rankList = $('.rank-list') as HTMLOListElement;
-const deathsList = $('.deaths-list') as HTMLOListElement;
-const recoveredList = $('.recovered-list') as HTMLOListElement;
+
+// const confirmedTotal = $('.confirmed-total') as HTMLSpanElement;
+// const deathsTotal = $('.deaths') as HTMLParagraphElement;
+// const recoveredTotal = $('.recovered') as HTMLParagraphElement;
+// const lastUpdatedTime = $('.last-updated-time') as HTMLSpanElement;
+// const rankList = $('.rank-list') as HTMLOListElement;
+// const deathsList = $('.deaths-list') as HTMLOListElement;
+// const recoveredList = $('.recovered-list') as HTMLOListElement;
+// const deathSpinner = createSpinnerElement('deaths-spinner');
+// const recoveredSpinner = createSpinnerElement('recovered-spinner');
+
+const temp = $('.abc');
+const confirmedTotal = $<HTMLSpanElement>('.confirmed-total');
+const deathsTotal = $<HTMLParagraphElement>('.deaths');
+const recoveredTotal = $<HTMLParagraphElement>('.recovered');
+const lastUpdatedTime = $<HTMLSpanElement>('.last-updated-time');
+const rankList = $<HTMLOListElement>('.rank-list');
+const deathsList = $<HTMLOListElement>('.deaths-list');
+const recoveredList = $<HTMLOListElement>('.recovered-list');
 const deathSpinner = createSpinnerElement('deaths-spinner');
 const recoveredSpinner = createSpinnerElement('recovered-spinner');
 
@@ -181,7 +197,7 @@ function setRecoveredList(data: CountrySummaryResponse) {
 }
 
 function clearRecoveredList() {
-  recoveredList.innerHTML = null;
+  recoveredList.innerHTML = '';
 }
 
 function setTotalRecoveredByCountry(data: CountrySummaryResponse) {
