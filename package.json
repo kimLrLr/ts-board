@@ -1,0 +1,16 @@
+{
+  "name": "ts-board",
+  "version": "1.0.0",
+  "description": "1. 타입스크립트 프로젝트 생성",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
